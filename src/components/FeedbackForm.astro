@@ -1,0 +1,172 @@
+---
+import Icon from './Icon.astro';
+import TornEdge from './TornEdge.astro';
+
+// Texte wörtlich aus /feedback/. Formular ohne Backend (action="#" wie Bestand).
+const cities = [
+  'Berlin (Kurfürstendamm / Alexanderplatz)',
+  'Frankfurt am Main (Zeil / Hauptbahnhof)',
+  'Köln (Schildergasse / Neumarkt)',
+  'Düsseldorf (Schadowstraße / Altstadt)',
+  'Hamburg (Mönckebergstraße / Sternschanze)',
+  'München (Hauptbahnhof / Sendlinger Tor)',
+  'Stuttgart (Königstraße)',
+  'Dortmund (Westenhellweg)',
+  'Essen (Kettwiger Straße)',
+  'Leipzig (Grimmaische Straße)',
+  'Hannover (Georgstraße)',
+  'Nürnberg (Karolinenstraße)',
+  'Bremen (Obernstraße)',
+  'Dresden (Prager Straße)',
+  'Andere Filiale / Region',
+];
+
+const questions = [
+  { name: 'praesentation', title: '1. Präsentation der Speisen', text: 'Anrichtung, Frische-Optik und appetitliches Erscheinungsbild' },
+  { name: 'geschmack', title: '2. Geschmack des Essens', text: 'Würzung, Fleischqualität, Maydonoz-Spezialsauce und Lavaş' },
+  { name: 'service', title: '3. Service und Freundlichkeit', text: 'Höflichkeit, Aufmerksamkeit und Gastfreundschaft unseres Teams' },
+  { name: 'geschwindigkeit', title: '4. Servicegeschwindigkeit vor der Bestellung', text: 'Wartezeit, Bestellannahme und zügige Zubereitung am Grill' },
+  { name: 'sauberkeit', title: '5. Sauberkeit des Restaurants', text: 'Hygiene im Gastraum, an den Tischen und an der Theke' },
+];
+
+const scale = ['Sehr schlecht', 'Schlecht', 'Mittel', 'Gut', 'Sehr gut'];
+---
+
+<section id="formular" class="cv-auto on-light relative bg-paper pt-16 pb-28 text-text-dark lg:pt-20 lg:pb-36">
+  <div class="container-page">
+    <form id="feedback-form" action="#" method="post" class="mx-auto max-w-4xl space-y-8">
+      <!-- 01 Kontaktdaten -->
+      <fieldset class="card-light p-6 sm:p-9" data-reveal>
+        <legend class="sr-only">Kontaktdaten</legend>
+        <div class="flex items-end gap-4">
+          <span class="font-script text-5xl leading-none text-accent-ink" aria-hidden="true">01</span>
+          <div>
+            <h2 class="text-xl font-extrabold">Kontaktdaten</h2>
+            <p class="text-xs font-semibold tracking-[0.08em] text-muted-dark uppercase">Persönliche Angaben</p>
+          </div>
+        </div>
+        <div class="mt-8 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="f-vorname" class="field-label">Vorname *</label>
+            <input id="f-vorname" name="vorname" type="text" placeholder="Vorname" autocomplete="given-name" required class="field" />
+          </div>
+          <div>
+            <label for="f-nachname" class="field-label">Nachname *</label>
+            <input id="f-nachname" name="nachname" type="text" placeholder="Nachname" autocomplete="family-name" required class="field" />
+          </div>
+          <div>
+            <label for="f-stadt" class="field-label">Provinz / Stadt *</label>
+            <select id="f-stadt" name="stadt" required class="field">
+              <option value="">Bitte wählen Sie eine Stadt / Filiale</option>
+              {cities.map((c) => <option value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label for="f-telefon" class="field-label">Telefonnummer *</label>
+            <input
+              id="f-telefon"
+              name="telefon"
+              type="tel"
+              placeholder="+49 170 1234567"
+              autocomplete="tel"
+              required
+              class="field"
+              aria-describedby="f-telefon-hint"
+            />
+            <p id="f-telefon-hint" class="mt-1.5 text-xs text-muted-dark">Hinweistext: Erforderlich, um mit Ihnen Kontakt aufnehmen zu können.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 02 Zufriedenheit -->
+      <div class="card-light p-6 sm:p-9" data-reveal>
+        <div class="flex items-end gap-4">
+          <span class="font-script text-5xl leading-none text-accent-ink" aria-hidden="true">02</span>
+          <div>
+            <h2 class="text-xl font-extrabold">Fragen zur Zufriedenheit</h2>
+            <p class="text-xs font-semibold tracking-[0.08em] text-muted-dark uppercase">Bewertungsskala: <span class="normal-case">1 (Sehr schlecht) bis 5 (Sehr gut)</span></p>
+          </div>
+        </div>
+
+        <div class="mt-8 divide-y divide-line">
+          {
+            questions.map((q) => (
+              <fieldset class="py-6 first:pt-0">
+                <legend class="float-left w-full">
+                  <h3 class="text-[0.95rem] font-extrabold">{q.title}</h3>
+                </legend>
+                <p class="mt-1 text-sm text-muted-dark">{q.text}</p>
+                <div class="mt-4 grid grid-cols-5 gap-2">
+                  {scale.map((label, i) => (
+                    <label class="rating-option">
+                      <input type="radio" name={q.name} value={i + 1} class="peer sr-only" />
+                      <span class="flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-[2px] border border-line bg-white px-1 py-2 text-center transition-colors peer-checked:border-accent peer-checked:bg-accent peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-text-dark hover:border-text-dark">
+                        <span class="text-sm font-extrabold">
+                          <span aria-hidden="true">★</span> {i + 1}
+                        </span>
+                        <span class="text-[0.65rem] leading-tight font-semibold sm:text-xs">{label}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))
+          }
+
+          <fieldset class="pt-6">
+            <legend class="float-left w-full">
+              <h3 class="text-[0.95rem] font-extrabold">
+                Glauben Sie, dass Sie eine angemessene Gegenleistung für Ihre Zahlung erhalten haben? (Preis-Leistungs-Verhältnis) *
+              </h3>
+            </legend>
+            <p class="mt-1 text-sm text-muted-dark">Ihre Einschätzung zu Portionsgröße, Qualität und Preisgefüge.</p>
+            <div class="mt-4 flex gap-3">
+              {
+                ['Ja', 'Nein'].map((v) => (
+                  <label>
+                    <input type="radio" name="preis_leistung" value={v} required class="peer sr-only" />
+                    <span class="chip min-w-24 justify-center border-line bg-white peer-checked:border-accent peer-checked:bg-accent peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-text-dark">
+                      {v}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <!-- 03 Nachricht -->
+      <fieldset class="card-light p-6 sm:p-9" data-reveal>
+        <legend class="sr-only">Nachricht & Absenden</legend>
+        <div class="flex items-end gap-4">
+          <span class="font-script text-5xl leading-none text-accent-ink" aria-hidden="true">03</span>
+          <div>
+            <h2 class="text-xl font-extrabold">Nachricht & Absenden</h2>
+            <p class="text-xs font-semibold tracking-[0.08em] text-muted-dark uppercase">Abschluss</p>
+          </div>
+        </div>
+        <div class="mt-8">
+          <label for="f-nachricht" class="field-label">Ihre Nachricht, die Sie uns mitteilen möchten</label>
+          <textarea
+            id="f-nachricht"
+            name="nachricht"
+            rows="6"
+            placeholder="Teilen Sie uns hier Lob, Kritik oder konkrete Verbesserungswünsche zu Ihrem Besuch mit..."
+            class="field resize-y"></textarea>
+        </div>
+        <label class="mt-6 flex items-start gap-3 text-sm text-muted-dark">
+          <input type="checkbox" name="datenschutz" required class="mt-0.5 size-5 shrink-0 accent-[var(--color-accent-deep)]" />
+          <span>Ich habe den Informationstext / die Datenschutzerklärung gelesen und akzeptiere sie. *</span>
+        </label>
+        <p class="mt-4 text-xs text-muted-dark">* Pflichtfelder für eine vollständige Bearbeitung.</p>
+        <button type="submit" class="btn btn-primary mt-6 max-sm:w-full">
+          <Icon name="chevron-right" size={16} class="stroke-[2.5]" />
+          Feedback Absenden
+        </button>
+      </fieldset>
+    </form>
+  </div>
+
+  <TornEdge color="text-night" seed={91} />
+</section>

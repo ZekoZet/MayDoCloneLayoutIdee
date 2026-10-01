@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactSection from '../components/ContactSection.astro';
+import FeedbackTeaser from '../components/FeedbackTeaser.astro';
+
+const title = 'Kundenkontaktformular | Maydonoz Döner Deutschland';
+const description =
+  'Sie können uns Ihre Wünsche, Vorschläge und Beschwerden mitteilen, indem Sie das Formular ausfüllen. Wir freuen uns auf Ihre Nachricht.';
+---
+
+<BaseLayout title={title} description={description} path="/kontakt/">
+  <PageHero
+    small="Kundenservice"
+    large="& Betreuung"
+    title="KONTAKTFORMULAR"
+    text="Sie können uns Ihre Wünsche, Vorschläge und Beschwerden mitteilen, indem Sie das Formular ausfüllen."
+    edge="text-paper"
+    seed={19}
+  />
+  <ContactSection />
+  <FeedbackTeaser />
+</BaseLayout>

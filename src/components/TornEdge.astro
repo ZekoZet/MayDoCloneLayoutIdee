@@ -1,0 +1,155 @@
+---
+// Realistische Papierriss-Kante als Inline-SVG (Vorlage: weich gerissenes Papier
+// mit großen Hügeln/Tälern, rundlichen Buckeln und kleinen Kerben).
+// Aufbau (von hinten nach vorn): weicher Schatten → heller Saum → Papierfläche.
+// Farbe über currentColor = Hintergrund der Folgesektion.
+interface Props {
+  /** Tailwind-Textfarbe der Folgesektion, z. B. "text-paper" */
+  color: string;
+  /** Startwert für die Zufallsform, damit nicht jede Kante gleich aussieht */
+  seed?: number;
+  /** oben = Riss ragt von oben in die Sektion */
+  position?: 'bottom' | 'top';
+}
+
+const { color, seed = 7, position = 'bottom' } = Astro.props;
+const darkPaper = color === 'text-ink' || color === 'text-night';
+
+// Deterministischer Pseudo-Zufall (mulberry32) → identisches Markup bei jedem Build
+let s = seed * 0x9e3779b1;
+const rand = () => {
+  s = (s + 0x6d2b79f5) | 0;
+  let t = Math.imul(s ^ (s >>> 15), 1 | s);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const between = (min: number, max: number) => min + rand() * (max - min);
+// ≈ Normalverteilung mit Standardabweichung 1
+const gauss = () => (rand() + rand() + rand() - 1.5) / 0.5;
+
+// Breite viewBox + "slice": keine Verzerrung, seitlich wird beschnitten
+const W = 2400;
+const H = 100;
+const BASE = 54;
+
+// 1) Rissverlauf per Mittelpunktverschiebung mit Amplitude je Skala:
+//    kräftige große Wellen, rundliche mittlere Buckel, kaum Mikro-Zacken
+const LEVELS = 11; // 2400 / 2^11 ≈ 1,2 Einheiten Auflösung
+const n = 2 ** LEVELS;
+const ampFor: Record<number, number> = { 2048: 16, 1024: 15, 512: 13, 256: 10, 128: 7, 64: 4.5, 32: 2.8, 16: 1.6, 8: 0.7, 4: 0.3, 2: 0.12 };
+let ys = new Array<number>(n + 1);
+ys[0] = BASE + gauss() * 5;
+ys[n] = BASE + gauss() * 5;
+for (let size = n; size > 1; size /= 2) {
+  const amp = ampFor[size] ?? 0.1;
+  for (let i = size / 2; i < n; i += size) {
+    // gelegentliche Absätze, wo der Riss die Richtung wechselt
+    const jump = size <= 64 && size >= 16 && rand() < 0.07 ? gauss() * amp * 1.6 : 0;
+    ys[i] = (ys[i - size / 2] + ys[i + size / 2]) / 2 + gauss() * amp + jump;
+  }
+}
+
+// Kleine Kerben und Nasen (wie ausgerissene Stücke) – vor dem Glätten, damit sie weich werden
+for (let i = 4; i < n - 24; i++) {
+  if (rand() < 0.01) {
+    const width = Math.round(between(7, 20));
+    const depth = (rand() < 0.6 ? 1 : -1) * between(2, 5);
+    for (let k = 0; k <= width; k++) ys[i + k] += depth * Math.sin((k / width) * Math.PI) ** 0.7;
+    i += width;
+  }
+}
+
+// Buckel abrunden (2× gleitender Mittelwert über 5 Punkte)
+for (let pass = 0; pass < 2; pass++) {
+  ys = ys.map((_, i) => {
+    let sum = 0;
+    let count = 0;
+    for (let k = -2; k <= 2; k++) {
+      const v = ys[i + k];
+      if (v !== undefined) {
+        sum += v;
+        count++;
+      }
+    }
+    return sum / count;
+  });
+}
+
+const clamp = (v: number) => Math.min(H - 10, Math.max(14, v));
+const line: [number, number][] = ys.map((y, i) => [(i / n) * W, clamp(y)]);
+
+// 2) Heller Saum: schmal, in der Breite leicht schwankend
+let wn = 0.4;
+const rim: [number, number][] = line.map(([x, y]) => {
+  wn = Math.min(1, Math.max(0, wn + gauss() * 0.03));
+  return [x, y - (0.6 + wn ** 1.5 * 2.4)];
+});
+
+// Kompakter Pfad: relative Ganzzahl-Koordinaten (1 Einheit ≈ 0,8 px). Die Fläche reicht unter den
+// sichtbaren Bereich, damit der Kantenfilter unten nichts transparent verschiebt.
+const toPath = (pts: [number, number][]) => {
+  let px = 0;
+  let py = H + 20;
+  const parts: string[] = [];
+  for (const [x, y] of [[0, Math.round(pts[0][1])] as [number, number], ...pts, [W, H + 20] as [number, number]]) {
+    const nx = Math.round(x);
+    const ny = Math.round(y);
+    if (nx === px && ny === py) continue;
+    parts.push(`${nx - px},${ny - py}`);
+    px = nx;
+    py = ny;
+  }
+  return `M0,${H + 20}l${parts.join(' ')}z`;
+};
+
+// Für die Ausgabe jeden vierten Punkt (≈ 3,7 px) – spart HTML, der Kantenfilter erzeugt die Feinheit
+const thin = (pts: [number, number][]) => pts.filter((_, i) => i % 4 === 0 || i === pts.length - 1);
+const paperPath = toPath(thin(line));
+const rimPath = toPath(thin(rim));
+
+// Farben: helles Papier bekommt einen weißen Saum, dunkles einen grauen
+const rimFill = darkPaper ? '#8f8f8f' : '#ffffff';
+const rimOpacity = darkPaper ? 0.45 : 0.6;
+const shadowOpacity = darkPaper ? 0.18 : 0.45;
+
+const id = `torn-${seed}-${Math.round(rand() * 1e6)}`;
+
+const sizeClasses = [
+  'pointer-events-none absolute left-0 z-[2] block h-[clamp(44px,5.4vw,78px)] w-full',
+  position === 'bottom' ? 'bottom-[-1px]' : 'top-[-1px] rotate-180',
+];
+---
+
+<svg
+  class:list={[...sizeClasses, color]}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="xMidYMax slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <path id={`${id}-rimpath`} d={rimPath} />
+    <!-- Leicht unregelmäßige, weiche Papierkante -->
+    <filter id={`${id}-edge`} x="-1%" y="-20%" width="102%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.45 0.8" numOctaves="2" seed={seed} result="n" />
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="d" />
+      <feGaussianBlur in="d" stdDeviation="0.3" />
+    </filter>
+    <!-- Saum: etwas weicher und faseriger -->
+    <filter id={`${id}-rim`} x="-1%" y="-30%" width="102%" height="160%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7 1.5" numOctaves="2" seed={seed + 11} result="n" />
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="d" />
+      <feGaussianBlur in="d" stdDeviation="0.6" />
+    </filter>
+    <!-- Weicher Schatten, der das Papier abhebt -->
+    <filter id={`${id}-shadow`} x="-2%" y="-60%" width="104%" height="220%">
+      <feGaussianBlur stdDeviation="2.4" />
+    </filter>
+  </defs>
+
+  <!-- Saum-Pfad (in defs) für Schatten und Saum wiederverwendet -->
+  <use href={`#${id}-rimpath`} transform="translate(0 -1.5)" fill="#000" opacity={shadowOpacity} filter={`url(#${id}-shadow)`}></use>
+  <use href={`#${id}-rimpath`} fill={rimFill} opacity={rimOpacity} filter={`url(#${id}-rim)`}></use>
+  <!-- Papier ohne Körnung: die Folgesektion blendet ihre Körnung oben erst ein → keine Naht -->
+  <path d={paperPath} fill="currentColor" filter={`url(#${id}-edge)`}></path>
+</svg>

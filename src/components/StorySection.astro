@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import k1 from '../assets/konzept/konsept1.webp';
+import k3 from '../assets/konzept/konsept3.webp';
+import k5 from '../assets/konzept/konsept5.webp';
+import kitchen from '../assets/konzept/about-kitchen.webp';
+import Icon from './Icon.astro';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+import RoundButton from './RoundButton.astro';
+import { pillars, pillarsIntro } from '../data/pillars';
+
+interface Props {
+  nextId: string;
+  nextLabel: string;
+}
+const { nextId, nextLabel } = Astro.props;
+
+const features = pillars.slice(0, 3);
+---
+
+<section id="story" class="cv-auto on-light relative z-[1] overflow-x-clip bg-paper pt-24 pb-28 text-text-dark lg:pt-32 lg:pb-40">
+  <!-- Angeschnittene Kreise an den Rändern (Vorlage: Food-Freisteller) -->
+  <div class="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true">
+    <div class="absolute -left-24 top-10 size-56 xl:size-64" data-roll="left">
+      <Image src={k1} alt="" width={300} height={300} class="plate size-full rounded-full object-cover" />
+    </div>
+    <div class="absolute -left-16 -bottom-6 size-44 xl:size-52" data-roll="left">
+      <Image src={k3} alt="" width={300} height={300} class="plate size-full rounded-full object-cover" />
+    </div>
+    <div class="absolute -right-20 -bottom-16 size-64 xl:size-72" data-roll="right">
+      <Image src={kitchen} alt="" width={300} height={300} class="plate size-full rounded-full object-cover" />
+    </div>
+    <div class="absolute right-[18%] -bottom-4 size-32 xl:right-[21%]" data-roll="right">
+      <Image src={k5} alt="" width={300} height={300} class="plate size-full rounded-full object-cover" />
+    </div>
+  </div>
+
+  <div class="container-page relative grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
+    <div class="lg:col-span-5 lg:pl-8">
+      <ScriptHeading large="Unsere" small="Säulen" tone="accent" align="left" smallAfter>
+        <h2 class="headline mt-7 max-w-md text-text-dark" data-reveal>{pillarsIntro.heading}</h2>
+        <p class="mt-5 max-w-md text-[0.95rem] text-muted-dark" data-reveal>{pillarsIntro.text}</p>
+      </ScriptHeading>
+    </div>
+
+    <div class="lg:col-span-7 lg:pb-24">
+      <ul class="card-light grid divide-y divide-line p-2 sm:grid-cols-3 sm:divide-x sm:divide-y-0" data-reveal-stagger>
+        {
+          features.map((f) => (
+            <li class="flex gap-4 p-5 sm:flex-col sm:gap-3">
+              <Icon name={f.icon} size={34} class="shrink-0 text-accent-deep" />
+              <div>
+                <h3 class="text-[0.8rem] leading-snug font-extrabold">{f.title}</h3>
+                <p class="mt-2 text-[0.8rem] leading-relaxed text-muted-dark">{f.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3" data-reveal>
+        <a href="/ueber-uns/" class="btn btn-primary">
+          <Icon name="chevron-right" size={16} class="stroke-[2.5]" />
+          Über uns
+        </a>
+        <a href="/news/" class="text-link text-text-dark">Nachrichten / Neuigkeiten</a>
+      </div>
+    </div>
+  </div>
+
+  <TornEdge color="text-ink" seed={11} />
+  <RoundButton href={`#${nextId}`} label={nextLabel} onEdge />
+</section>

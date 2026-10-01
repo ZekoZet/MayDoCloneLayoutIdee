@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeHero from '../components/HomeHero.astro';
+import StorySection from '../components/StorySection.astro';
+import MenuCarousel from '../components/MenuCarousel.astro';
+import DiscoverSection from '../components/DiscoverSection.astro';
+import { jsonLd } from '../data/site';
+
+// SEO 1:1 aus dem Bestand
+const title = 'Maydonoz Döner | Franchise & Systemgastronomie';
+const description =
+  'Maydonoz Döner — Die führende internationale Döner-Systemgastronomie mit über 250 Standorten. 100% zertifiziertes Halal-Fleisch, frisch gebackenes Lavaş & lukrative Franchise-Möglichkeiten.';
+---
+
+<BaseLayout title={title} description={description} path="/" jsonLd={jsonLd}>
+  <HomeHero nextId="story" nextLabel="STRATEGISCHE LEITPRINZIPIEN & QUALITÄT" />
+  <StorySection nextId="menu" nextLabel="NEUHEITEN" />
+  <MenuCarousel nextId="discover" nextLabel="INZWISCHEN IN EINER MAYDONOZ FILIALE IN IHRER NÄHE" />
+  <DiscoverSection />
+</BaseLayout>

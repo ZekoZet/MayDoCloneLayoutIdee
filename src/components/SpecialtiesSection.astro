@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+import RoundButton from './RoundButton.astro';
+import { specialties } from '../data/menu';
+
+interface Props {
+  nextId: string;
+  nextLabel: string;
+}
+const { nextId, nextLabel } = Astro.props;
+---
+
+<section id="spezialitaeten" class="cv-auto on-dark relative isolate z-[1] overflow-x-clip pt-20 pb-28 text-white lg:pt-24 lg:pb-36">
+  <div class="fade-top-ink" aria-hidden="true"></div>
+
+  <div class="container-page">
+    <ScriptHeading small="Unsere" large="Spezialitäten" tone="light">
+      <h2 class="eyebrow mt-3 text-white/70" data-reveal>{specialties.heading}</h2>
+    </ScriptHeading>
+
+    <!-- mobil: scroll-snap-Karussell, ab md: Raster -->
+    <ul class="snap-track -mx-4 mt-8 gap-5 px-4 pt-4 md:mx-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12 md:overflow-visible md:px-0" data-reveal-stagger>
+      {
+        specialties.items.map((item) => (
+          <li class="w-[82vw] md:w-auto">
+            <figure>
+              <div class="relative">
+                <span class="badge absolute -top-3 left-6 z-10 shadow-md">{item.badge}</span>
+                <div class="plate aspect-[2/1] rounded-[1.75rem]">
+                  <Image src={item.image} alt={item.alt} widths={[480, 600, 760, 1100]} sizes="(min-width: 768px) 50vw, 82vw" quality={65} class="size-full object-cover" />
+                </div>
+              </div>
+              <figcaption class="mt-5 text-center">
+                <h3 class="text-base font-extrabold text-accent sm:text-lg">{item.title}</h3>
+              </figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <TornEdge color="text-paper" seed={21} />
+  <RoundButton href={`#${nextId}`} label={nextLabel} onEdge />
+</section>

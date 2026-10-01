@@ -1,0 +1,49 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+
+// Über uns „Services & Angebote“ – Texte wörtlich.
+// /franchise/ existiert im Bestand nicht (404) → Karte ohne Link.
+const services: { title: string; text: string; href?: string; icon: IconName }[] = [
+  { title: 'FRANCHISE WERDEN', text: 'ERFOLGREICH WACHSEN', icon: 'handshake' },
+  { title: 'FILIALEN FINDEN', text: 'ÜBER 250 STANDORTE', href: '/filialen/', icon: 'pin' },
+  { title: 'KONTAKT & FEEDBACK', text: 'WIR FREUEN UNS AUF SIE', href: '/kontakt/', icon: 'chat' },
+];
+---
+
+<section id="services" class="cv-auto on-light relative bg-paper pt-24 pb-28 text-text-dark lg:pt-28 lg:pb-36">
+  <div class="container-page">
+    <ScriptHeading small="Services" large="& Angebote" tone="dark">
+      <h2 class="headline mt-5 text-text-dark" data-reveal>MÖCHTEN SIE MEHR ERFAHREN?</h2>
+    </ScriptHeading>
+
+    <ul class="card-light mx-auto mt-12 grid max-w-5xl divide-y divide-line p-2 md:grid-cols-3 md:divide-x md:divide-y-0" data-reveal-stagger>
+      {
+        services.map((s) => {
+          const inner = (
+            <>
+              <Icon name={s.icon} size={38} class="text-accent-deep" />
+              <span class="mt-4 block text-sm font-extrabold tracking-[0.04em]">{s.title}</span>
+              <span class="mt-1 block text-xs font-semibold tracking-[0.1em] text-muted-dark">{s.text}</span>
+            </>
+          );
+          return (
+            <li>
+              {s.href ? (
+                <a href={s.href} class="group flex h-full flex-col items-center p-8 text-center transition-colors hover:bg-paper">
+                  {inner}
+                  <Icon name="arrow-right" size={20} class="mt-4 text-text-dark transition-transform group-hover:translate-x-1" />
+                </a>
+              ) : (
+                <div class="flex h-full flex-col items-center p-8 text-center">{inner}</div>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+
+  <TornEdge color="text-ink" seed={33} />
+</section>

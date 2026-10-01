@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import FeedbackForm from '../components/FeedbackForm.astro';
+
+const title = 'Feedback & Gästezufriedenheit | Maydonoz Döner Deutschland';
+const description =
+  'Ihre Meinung zählt! Teilen Sie Ihr Feedback zu Geschmack, Service, Schnelligkeit und Restaurant-Sauberkeit direkt mit dem Maydonoz Döner Qualitätsmanagement.';
+---
+
+<BaseLayout title={title} description={description} path="/feedback/">
+  <PageHero
+    small="Qualitätssicherung"
+    large="& Feedback"
+    title="IHRE MEINUNG ZÄHLT"
+    text="Helfen Sie uns, jeden Tag noch besser zu werden. Jede Rückmeldung wird direkt von unserem zentralen Qualitätsmanagement geprüft und beantwortet."
+    edge="text-paper"
+    seed={23}
+  />
+  <FeedbackForm />
+</BaseLayout>

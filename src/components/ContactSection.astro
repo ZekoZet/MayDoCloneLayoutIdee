@@ -1,0 +1,73 @@
+---
+import Icon from './Icon.astro';
+import TornEdge from './TornEdge.astro';
+
+// Texte wörtlich aus /kontakt/. Formular ohne Backend (action="#" wie Bestand).
+const fields = [
+  { name: 'vorname', label: 'Vorname *', type: 'text', placeholder: 'Vorname', autocomplete: 'given-name' },
+  { name: 'nachname', label: 'Nachname *', type: 'text', placeholder: 'Nachname', autocomplete: 'family-name' },
+  { name: 'email', label: 'Ihre E-Mail-Adresse *', type: 'email', placeholder: 'E-Mail-Adresse', autocomplete: 'email' },
+  { name: 'telefon', label: 'Ihre Telefonnummer *', type: 'tel', placeholder: 'Ihre Telefonnummer', autocomplete: 'tel' },
+];
+---
+
+<section id="formular" class="cv-auto on-light relative bg-paper pt-16 pb-28 text-text-dark lg:pt-20 lg:pb-36">
+  <div class="container-page grid items-start gap-8 lg:grid-cols-[1.6fr_1fr]">
+    <div class="card-light p-6 sm:p-9" data-reveal>
+      <h2 class="text-xl font-extrabold">Ihre Mitteilung an uns</h2>
+      <p class="mt-2 text-sm text-muted-dark">Füllen Sie bitte die folgenden Felder aus. Wir bearbeiten Ihre Anfrage schnellstmöglich.</p>
+
+      <form id="kontakt-form" action="#" method="post" class="mt-8 grid gap-5 sm:grid-cols-2">
+        {
+          fields.map((f) => (
+            <div>
+              <label for={`k-${f.name}`} class="field-label">
+                {f.label}
+              </label>
+              <input id={`k-${f.name}`} name={f.name} type={f.type} placeholder={f.placeholder} autocomplete={f.autocomplete} required class="field" />
+            </div>
+          ))
+        }
+        <div class="sm:col-span-2">
+          <label for="k-nachricht" class="field-label">Ihre Nachricht *</label>
+          <textarea id="k-nachricht" name="nachricht" rows="6" placeholder="Ihre Nachricht" required class="field resize-y"></textarea>
+        </div>
+        <label class="flex items-start gap-3 text-sm text-muted-dark sm:col-span-2">
+          <input type="checkbox" name="datenschutz" required class="mt-0.5 size-5 shrink-0 accent-[var(--color-accent-deep)]" />
+          <span>Ich habe die Datenschutzerklärung gelesen und stimme der Verarbeitung meiner Daten zur Beantwortung meiner Anfrage zu. *</span>
+        </label>
+        <p class="text-xs text-muted-dark sm:col-span-2">* Pflichtfelder für eine vollständige Bearbeitung.</p>
+        <div class="sm:col-span-2">
+          <button type="submit" class="btn btn-primary max-sm:w-full">
+            <Icon name="chevron-right" size={16} class="stroke-[2.5]" />
+            Nachricht Absenden
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="on-dark relative overflow-hidden rounded-[4px] bg-ink p-8 text-white lg:sticky lg:top-24" data-reveal>
+      <div class="texture-chalk absolute inset-0" aria-hidden="true"></div>
+      <div class="relative">
+        <p class="eyebrow text-accent">ZENTRALE DEUTSCHLAND</p>
+        <h3 class="mt-2 text-lg font-extrabold">Maydonoz Döner Deutschland</h3>
+        <ul class="mt-6 space-y-4 text-sm text-white/80">
+          <li class="flex gap-3">
+            <Icon name="pin" size={20} class="shrink-0 text-accent" />
+            <span>Kurfürstendamm 194<br />10707 Berlin, Deutschland</span>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="mail" size={20} class="shrink-0 text-accent" />
+            <a href="mailto:info@maydonozdoner.de" class="hover:text-accent">info@maydonozdoner.de</a>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="clock" size={20} class="shrink-0 text-accent" />
+            <span>Mo - Fr: 09:00 - 18:00 Uhr</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <TornEdge color="text-ink" seed={83} />
+</section>

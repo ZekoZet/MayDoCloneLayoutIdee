@@ -1,0 +1,25 @@
+---
+// Runder Pfeil-Button, der mittig auf einer Sektionskante sitzt (Vorlage)
+import Icon from './Icon.astro';
+
+interface Props {
+  href: string;
+  label: string;
+  direction?: 'down' | 'up';
+  /** sitzt auf der Risslinie einer TornEdge statt auf der Sektionskante */
+  onEdge?: boolean;
+}
+
+const { href, label, direction = 'down', onEdge = false } = Astro.props;
+---
+
+<a
+  href={href}
+  aria-label={label}
+  class:list={[
+    'absolute left-1/2 z-[3] grid size-11 -translate-x-1/2 translate-y-1/2 place-items-center rounded-full bg-white text-accent-deep shadow-[0_6px_18px_-6px_rgb(0_0_0/0.5)] transition-transform duration-200 hover:scale-110',
+    onEdge ? 'bottom-[clamp(20px,2.5vw,36px)]' : 'bottom-0',
+  ]}
+>
+  <Icon name={direction === 'down' ? 'chevron-down' : 'chevron-up'} size={20} class="stroke-[2.5]" />
+</a>

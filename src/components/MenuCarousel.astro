@@ -1,0 +1,154 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import ScriptHeading from './ScriptHeading.astro';
+import RoundButton from './RoundButton.astro';
+import { novelties } from '../data/menu';
+
+interface Props {
+  nextId: string;
+  nextLabel: string;
+}
+const { nextId, nextLabel } = Astro.props;
+const { items } = novelties;
+---
+
+<section id="menu" class="on-dark relative isolate z-[2] overflow-x-clip pt-24 pb-28 text-white lg:pt-28 lg:pb-32">
+  <!-- Kreide-/Schiefer-Textur (CSS, ohne Bild) -->
+  <div class="fade-top-ink" aria-hidden="true"></div>
+  <div class="fade-bottom-night" aria-hidden="true"></div>
+
+  <div class="container-page relative" data-carousel>
+    <div class="flex flex-col-reverse gap-8 lg:block">
+      <!-- Tabs: vertikal links (Vorlage Breakfast/Lunch/Dinner) -->
+      <ul class="snap-track -mx-4 gap-5 px-4 lg:absolute lg:top-2 lg:left-8 lg:z-10 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0" aria-label={novelties.heading}>
+        {
+          items.map((item, i) => (
+            <li>
+              <button
+                type="button"
+                class="group flex min-h-11 items-center text-left text-sm font-semibold whitespace-nowrap text-white/80 transition-colors hover:text-accent aria-[current=true]:text-accent"
+                data-carousel-tab={i}
+                aria-controls={`slide-${item.id}`}
+                aria-current={i === 0 ? 'true' : 'false'}
+              >
+                <span class="border-b-2 border-transparent pb-0.5 group-aria-[current=true]:border-accent">{item.badge}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="min-w-0">
+        <ScriptHeading small="Unser" large="Menu" tone="light">
+          <h2 class="eyebrow mt-3 text-white/70" data-reveal>{novelties.heading}</h2>
+        </ScriptHeading>
+      </div>
+    </div>
+
+    <!-- Bühne -->
+    <div class="relative mt-10 lg:mt-12">
+      <button
+        type="button"
+        class="absolute top-[32%] left-0 z-10 hidden size-12 place-items-center text-accent transition-transform hover:-translate-x-1 md:grid lg:left-[8%]"
+        aria-label="Zurück"
+        data-carousel-prev
+      >
+        <Icon name="chevron-left" size={36} class="stroke-[2.5]" />
+      </button>
+      <button
+        type="button"
+        class="absolute top-[32%] right-0 z-10 hidden size-12 place-items-center text-white transition-transform hover:translate-x-1 md:grid lg:right-[8%]"
+        aria-label="Weiter"
+        data-carousel-next
+      >
+        <Icon name="chevron-right" size={36} class="stroke-[2.5]" />
+      </button>
+
+      <ul class="snap-track -mx-4 gap-6 px-[max(1rem,calc(50%-min(39vw,19rem)))] pt-4 pb-2 md:mx-0 lg:gap-10" data-carousel-track>
+        {
+          items.map((item, i) => (
+            <li
+              id={`slide-${item.id}`}
+              class="group/slide w-[min(78vw,38rem)] transition-transform duration-500 data-[active=false]:scale-[0.9]"
+              data-carousel-slide={i}
+              data-active={i === 0 ? 'true' : 'false'}
+            >
+              <figure>
+                <div class="relative">
+                  <span class="badge absolute -top-3 left-6 z-10 shadow-md">{item.badge}</span>
+                  <div class="plate relative aspect-[2/1] rounded-[2rem]">
+                    <Image
+                      src={item.image}
+                      alt={item.alt}
+                      widths={[480, 760, 1140]}
+                      sizes="(min-width: 1024px) 608px, 78vw"
+                      quality={65}
+                      class="size-full object-cover"
+                    />
+                    <span class="pointer-events-none absolute inset-0 bg-ink opacity-0 transition-opacity duration-500 group-data-[active=false]/slide:opacity-55" aria-hidden="true" />
+                  </div>
+                </div>
+                <figcaption class="mx-auto mt-7 max-w-md text-center transition-opacity duration-500 group-data-[active=false]/slide:opacity-0">
+                  <h3 class="text-base font-extrabold text-accent sm:text-lg">{item.title}</h3>
+                  <p class="mt-2 text-sm leading-relaxed text-white/65">{item.text}</p>
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href={novelties.cta.href} target="_blank" rel="noopener noreferrer" class="text-link">
+        {novelties.cta.label}
+      </a>
+    </div>
+  </div>
+
+  <RoundButton href={`#${nextId}`} label={nextLabel} />
+</section>
+
+<script>
+  // Karussell: Scroll-Snap + Pfeile/Tabs; aktives Element per IntersectionObserver
+  function initCarousels() {
+    document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+      const track = root.querySelector<HTMLElement>('[data-carousel-track]');
+      if (!track) return;
+      const slides = [...track.querySelectorAll<HTMLElement>('[data-carousel-slide]')];
+      const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-carousel-tab]')];
+      let current = 0;
+
+      const goTo = (index: number) => {
+        const i = (index + slides.length) % slides.length;
+        const slide = slides[i];
+        if (!slide) return;
+        track.scrollTo({ left: slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2, behavior: 'smooth' });
+      };
+
+      const setActive = (i: number) => {
+        current = i;
+        slides.forEach((s, n) => s.setAttribute('data-active', String(n === i)));
+        tabs.forEach((t, n) => t.setAttribute('aria-current', String(n === i)));
+      };
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.carouselSlide));
+          }
+        },
+        { root: track, threshold: 0.6 },
+      );
+      slides.forEach((s) => io.observe(s));
+
+      root.querySelector('[data-carousel-prev]')?.addEventListener('click', () => goTo(current - 1));
+      root.querySelector('[data-carousel-next]')?.addEventListener('click', () => goTo(current + 1));
+      tabs.forEach((t) => t.addEventListener('click', () => goTo(Number(t.dataset.carouselTab))));
+
+    });
+  }
+
+  initCarousels();
+</script>

@@ -1,0 +1,124 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/logo-512.png';
+import Icon from './Icon.astro';
+import { nav, site } from '../data/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string, children?: { href: string }[]) =>
+  href === '/' ? path === '/' : path.startsWith(href) || !!children?.some((c) => path.startsWith(c.href));
+---
+
+<header id="site-header" class="fixed inset-x-0 top-0 z-50 bg-[rgb(10_10_10/0.72)] transition-colors duration-300 data-[scrolled=true]:bg-[rgb(10_10_10/0.94)]">
+  <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.5rem]">
+    <a href="/" aria-label={site.homeAria} class="flex shrink-0 items-center">
+      <Image src={logo} alt={site.logoAlt} widths={[48, 96, 144]} sizes="48px" class="size-11 lg:size-12" loading="eager" />
+    </a>
+
+    <!-- Desktop-Navigation (zentriert wie Vorlage) – nur Geräte mit Maus und ≥ 1024 px -->
+    <nav aria-label="Hauptnavigation" class="hidden desk:block">
+      <ul class="flex items-center gap-1">
+        {
+          nav.map((item) => (
+            <li class="group relative" data-nav-item>
+              {item.children ? (
+                <>
+                  <button
+                    type="button"
+                    class:list={[
+                      'relative flex h-[4.5rem] items-center gap-1.5 px-4 text-[0.72rem] font-bold tracking-[0.1em] text-white transition-colors hover:text-accent',
+                      isActive(item.href, item.children) && 'is-active',
+                    ]}
+                    aria-expanded="false"
+                    data-dropdown-toggle
+                  >
+                    {item.label}
+                    <Icon name="chevron-down" size={14} class="transition-transform duration-200 group-hover:rotate-180" />
+                  </button>
+                  <ul class="invisible absolute left-1/2 top-full min-w-56 -translate-x-1/2 translate-y-2 border-t-2 border-accent bg-night py-2 opacity-0 shadow-xl transition-[opacity,transform] duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-data-[open=true]:visible group-data-[open=true]:translate-y-0 group-data-[open=true]:opacity-100">
+                    {item.children.map((child) => (
+                      <li>
+                        <a
+                          href={child.href}
+                          class="flex min-h-11 items-center px-5 text-sm font-medium text-white/85 transition-colors hover:bg-white/5 hover:text-accent"
+                          aria-current={path === child.href ? 'page' : undefined}
+                        >
+                          {child.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <a
+                  href={item.href}
+                  class:list={[
+                    'relative flex h-[4.5rem] items-center px-4 text-[0.72rem] font-bold tracking-[0.1em] text-white transition-colors hover:text-accent',
+                    isActive(item.href) && 'is-active',
+                  ]}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a href={site.cta.href} class="btn btn-primary hidden !px-4 sm:inline-flex">
+      <Icon name="pin" size={16} />
+      {site.cta.label}
+    </a>
+  </div>
+</header>
+
+<style>
+  /* Aktiver Menüpunkt: gelber Unterstrich (Vorlage) */
+  .is-active::after {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 0;
+    height: 2px;
+    background: var(--color-accent);
+  }
+</style>
+
+<script>
+  function initHeader() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+
+    const onScroll = () => header.setAttribute('data-scrolled', String(window.scrollY > 40));
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Dropdowns per Klick/Tastatur (Hover läuft über CSS)
+    document.querySelectorAll<HTMLButtonElement>('[data-dropdown-toggle]').forEach((btn) => {
+      const item = btn.closest<HTMLElement>('[data-nav-item]');
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') !== 'true';
+        btn.setAttribute('aria-expanded', String(open));
+        item?.setAttribute('data-open', String(open));
+      });
+      item?.addEventListener('focusout', (e) => {
+        if (!item.contains(e.relatedTarget as Node)) {
+          btn.setAttribute('aria-expanded', 'false');
+          item.setAttribute('data-open', 'false');
+        }
+      });
+      item?.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          btn.setAttribute('aria-expanded', 'false');
+          item.setAttribute('data-open', 'false');
+          btn.focus();
+        }
+      });
+    });
+  }
+
+  initHeader();
+</script>

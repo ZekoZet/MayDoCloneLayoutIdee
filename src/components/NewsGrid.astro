@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/logo-512.png';
+import Icon from './Icon.astro';
+import TornEdge from './TornEdge.astro';
+import { news, newsFilters, newsIntro as t } from '../data/news';
+---
+
+<section id="nachrichten" class="cv-auto on-dark relative isolate overflow-hidden pt-16 pb-28 text-white lg:pt-20 lg:pb-36" data-news>
+  <div class="fade-top-ink" aria-hidden="true"></div>
+
+  <div class="container-page">
+    <div class="snap-track -mx-4 gap-2 px-4 md:mx-0 md:flex-wrap md:justify-center md:px-0" role="group" aria-label={t.heading}>
+      {
+        newsFilters.map((f, i) => (
+          <button type="button" class="chip text-white/85 !border-white/30" aria-pressed={i === 0 ? 'true' : 'false'} data-news-filter={i === 0 ? '' : f.toLowerCase()}>
+            {f}
+          </button>
+        ))
+      }
+    </div>
+
+    <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger>
+      {
+        news.map((n) => (
+          <li data-news-item data-category={n.category}>
+            <article class="group relative isolate flex h-full min-h-52 flex-col justify-between overflow-hidden rounded-[4px] border border-white/10 bg-night p-5 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-accent/60">
+              <!-- Logo im Hintergrund: gedämpft → Hover farbig (Bestand) -->
+              <div class="absolute inset-0 -z-10 grid place-items-center" aria-hidden="true">
+                <Image
+                  src={logo}
+                  alt=""
+                  widths={[112, 224]}
+                  sizes="112px"
+                  class="size-28 opacity-25 blur-[2px] grayscale transition-[opacity,filter,transform] duration-500 group-hover:scale-110 group-hover:opacity-90 group-hover:blur-0 group-hover:grayscale-0"
+                />
+              </div>
+              <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/40 to-black/70" aria-hidden="true" />
+
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/75">
+                <span class="inline-flex items-center gap-1.5">
+                  <Icon name="user" size={14} />
+                  <span class="font-medium text-white">{t.author}</span>
+                  <span class="text-[11px] text-white/60">{t.authorSuffix}</span>
+                </span>
+                <span class="inline-flex items-center gap-1">
+                  <Icon name="clock" size={14} />
+                  <time datetime={n.isoDate}>{n.date}</time>
+                </span>
+                <span class="inline-flex items-center gap-1">
+                  <Icon name="chat" size={14} />
+                  {t.comments}
+                </span>
+              </div>
+              <h2 class="pt-6 text-[0.95rem] leading-snug font-bold text-white transition-colors group-hover:text-accent">{n.title}</h2>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <TornEdge color="text-paper" seed={71} />
+</section>
+
+<script>
+  // Filter: Karte sichtbar, wenn sich Schlagwörter von Filter und Kategorie überschneiden
+  function initNewsFilter() {
+    const root = document.querySelector<HTMLElement>('[data-news]');
+    if (!root) return;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-news-filter]')];
+    const items = [...root.querySelectorAll<HTMLElement>('[data-news-item]')];
+    const words = (s: string) => s.split('&').map((w) => w.trim()).filter(Boolean);
+
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const filter = words(btn.dataset.newsFilter ?? '');
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        items.forEach((item) => {
+          const cat = words(item.dataset.category ?? '');
+          item.hidden = filter.length > 0 && !filter.some((w) => cat.includes(w));
+        });
+      }),
+    );
+  }
+
+  initNewsFilter();
+</script>

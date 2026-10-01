@@ -1,0 +1,121 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+import { social } from '../data/site';
+import k1 from '../assets/konzept/konsept1.webp';
+import k2 from '../assets/konzept/konsept2.webp';
+import k3 from '../assets/konzept/konsept3.webp';
+import k4 from '../assets/konzept/konsept4.webp';
+import k5 from '../assets/konzept/konsept5.webp';
+import k6 from '../assets/konzept/konsept6.webp';
+import kitchen from '../assets/konzept/about-kitchen.webp';
+import hero1 from '../assets/bilder/hero1.webp';
+import hero2 from '../assets/bilder/hero2.webp';
+import hero6 from '../assets/bilder/hero6.webp';
+import hero7 from '../assets/bilder/hero7.webp';
+import hero8 from '../assets/bilder/hero8.webp';
+
+// Reihenfolge und Alt-Texte wie im Bestand
+const images: { src: ImageMetadata; alt: string }[] = [
+  { src: k1, alt: 'Maydonoz Döner Restaurant Atmosphäre' },
+  { src: k2, alt: 'Moderne Gastronomie' },
+  { src: hero1, alt: 'Spezialsauce Dürüm Zubereitung' },
+  { src: k3, alt: 'Frisch gegrillte Döner-Spezialitäten' },
+  { src: hero7, alt: 'Doritos MayTako' },
+  { src: kitchen, alt: 'Frische Zutaten in der Küche' },
+  { src: hero2, alt: 'Maydonoz Burger Spezial' },
+  { src: k4, alt: 'Store Interieur Design' },
+  { src: hero6, alt: 'Iskender Teller mit Joghurt' },
+  { src: k5, alt: 'Gemütlicher Gastraum' },
+  { src: hero8, alt: 'Snack & Fingerfood Box' },
+  { src: k6, alt: 'Maydonoz Döner Storefront' },
+];
+
+// Galeriebilder erst kurz vor dem Sichtbarwerden laden (natives lazy lädt mobil bis zu 2500 px im Voraus)
+const optimized = await Promise.all(images.map((img) => getImage({ src: img.src, width: 300, height: 300, quality: 65 })));
+const placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+const followLinks = social.filter((s) => ['instagram', 'facebook', 'youtube'].includes(s.key));
+const order = ['instagram', 'facebook', 'youtube'];
+followLinks.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+---
+
+<section id="vor-ort" class="cv-auto on-dark relative isolate overflow-hidden pt-20 pb-28 text-white lg:pt-24 lg:pb-36">
+  <div class="fade-top-ink" aria-hidden="true"></div>
+
+  <div class="container-page">
+    <ScriptHeading small="Vor Ort" large="erleben" tone="light">
+      <h2 class="mx-auto mt-5 max-w-xl text-sm font-bold tracking-[0.14em] text-white/90 uppercase" data-reveal>
+        INZWISCHEN IN EINER MAYDONOZ FILIALE IN IHRER NÄHE
+      </h2>
+    </ScriptHeading>
+
+    <ul class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5" data-reveal-stagger>
+      {
+        images.map((img, i) => (
+          <li class="plate aspect-square rounded-full !border-4">
+            <img
+              src={placeholder}
+              data-defer-src={optimized[i].src}
+              alt={img.alt}
+              width="300"
+              height="300"
+              decoding="async"
+              class="size-full object-cover opacity-0 transition-opacity duration-500 data-[loaded=true]:opacity-100"
+            />
+            <noscript>
+              <img src={optimized[i].src} alt={img.alt} width="300" height="300" class="size-full object-cover" />
+            </noscript>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+      <p class="text-sm font-semibold text-white/80">Folgen Sie uns auf</p>
+      <ul class="flex flex-wrap justify-center gap-3">
+        {
+          followLinks.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+                <Icon name={s.key} size={16} />
+                {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <TornEdge color="text-paper" seed={45} />
+</section>
+
+<script>
+  // Bilder 400 px vor dem Sichtbarwerden laden
+  const imgs = document.querySelectorAll<HTMLImageElement>('img[data-defer-src]');
+  const show = (img: HTMLImageElement) => {
+    img.addEventListener('load', () => img.setAttribute('data-loaded', 'true'), { once: true });
+    img.src = img.dataset.deferSrc ?? img.src;
+    img.removeAttribute('data-defer-src');
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            io.unobserve(e.target);
+            show(e.target as HTMLImageElement);
+          }
+        }
+      },
+      { rootMargin: '400px 0px' },
+    );
+    imgs.forEach((img) => io.observe(img));
+  } else {
+    imgs.forEach(show);
+  }
+</script>

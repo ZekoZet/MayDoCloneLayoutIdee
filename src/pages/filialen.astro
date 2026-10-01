@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import StoreFinder from '../components/StoreFinder.astro';
+import { storesIntro } from '../data/stores';
+
+const title = 'Maydonoz Döner Niederlassungen | Interaktiver Filialfinder & Standorte';
+const description =
+  'Entdecken Sie alle Maydonoz Döner Filialen in Deutschland. Interaktive Karte mit GPS-Routenplanung, Öffnungszeiten, Telefonnummern und Online-Bestellung.';
+---
+
+<BaseLayout title={title} description={description} path="/filialen/">
+  <PageHero small="Standorte" large="& Filialen" title={storesIntro.heading} text={storesIntro.text} edge="text-paper" seed={13} />
+  <StoreFinder />
+</BaseLayout>

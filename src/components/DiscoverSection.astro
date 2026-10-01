@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import seal from '../assets/brand/seal-cutout.png';
+import Icon from './Icon.astro';
+import ScriptHeading from './ScriptHeading.astro';
+import RoundButton from './RoundButton.astro';
+
+// Inhalt von /ueber-uns/ „Vor Ort erleben“
+---
+
+<section id="discover" class="on-dark relative isolate z-[1] flex min-h-[70svh] items-center py-28 text-white lg:min-h-[86svh]">
+  <!-- weicher Übergang zur Menü-Sektion darüber (die unten ins Dunkle ausblendet) -->
+  <div class="fade-top-night" aria-hidden="true"></div>
+  <!-- Freigestelltes Maydonoz-Siegel (scripts/make-seal.mjs) über dem durchgehenden Parallax-Hintergrund -->
+  <Image
+    src={seal}
+    alt=""
+    widths={[360, 560, 780]}
+    sizes="(min-width: 1024px) 35rem, 80vw"
+    quality={75}
+    class="pointer-events-none absolute top-1/2 left-1/2 -z-10 w-[min(80vw,35rem)] -translate-x-1/2 -translate-y-1/2 select-none"
+    aria-hidden="true"
+  />
+  <div class="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-night to-transparent" aria-hidden="true"></div>
+
+  <div class="container-page text-center">
+    <ScriptHeading small="Vor Ort" large="erleben" tone="light" size="xl" class="[text-shadow:0_4px_24px_rgb(0_0_0/0.6)]">
+      <h2 class="mx-auto mt-5 max-w-xl text-sm font-bold tracking-[0.14em] text-white/90 uppercase" data-reveal>
+        INZWISCHEN IN EINER MAYDONOZ FILIALE IN IHRER NÄHE
+      </h2>
+      <a href="/filialen/" class="btn btn-primary mt-9 max-sm:w-full" data-reveal>
+        <Icon name="chevron-right" size={16} class="stroke-[2.5]" />
+        Alle Standorte auf interaktiver Karte ansehen
+      </a>
+    </ScriptHeading>
+  </div>
+
+  <RoundButton href="#start" label="STARTSEITE" direction="up" />
+</section>

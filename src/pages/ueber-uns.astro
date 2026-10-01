@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SpecialtiesSection from '../components/SpecialtiesSection.astro';
+import ServicesSection from '../components/ServicesSection.astro';
+import GallerySection from '../components/GallerySection.astro';
+import PillarsSection from '../components/PillarsSection.astro';
+import { site } from '../data/site';
+
+const title = 'Über uns, Vision & Spezialitäten | Maydonoz Döner Deutschland';
+const description =
+  'Erfahren Sie mehr über Maydonoz Döner: Unsere beliebten Spezialitäten, Franchise-Möglichkeiten, Standorte und gelebte Qualität mit 100% Halal-Fleisch.';
+---
+
+<BaseLayout title={title} description={description} path="/ueber-uns/">
+  <PageHero small="Über" large="uns" title={site.heroTitle} edge="text-ink" seed={9} />
+  <SpecialtiesSection nextId="services" nextLabel="MÖCHTEN SIE MEHR ERFAHREN?" />
+  <ServicesSection />
+  <GallerySection />
+  <PillarsSection />
+</BaseLayout>

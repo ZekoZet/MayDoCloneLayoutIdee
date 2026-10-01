@@ -1,0 +1,498 @@
+@import 'tailwindcss';
+
+/* ---------- Fonts (self-hosted, Teilmengen via scripts/subset-fonts.mjs) ---------- */
+@font-face {
+  font-family: 'Kaushan Script';
+  src: url('/fonts/kaushan-script-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* Montserrat variabel (400–800) – eine Datei für alle Schnitte */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-var-latin.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+2013-2014, U+2018-201E, U+2022, U+2026, U+20AC, U+2122;
+}
+/* nur türkische Zeichen (News-Titel) – wird lediglich bei Bedarf geladen */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-var-tr.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0130, U+011E-011F, U+015E-015F;
+}
+
+/* Ersatzschriften mit angepassten Maßen (Capsize): gleiche Laufweite/Zeilenhöhe wie die
+   Webfonts → kein Layout-Sprung, wenn die Webfonts nach dem Laden eingewechselt werden */
+@font-face {
+  font-family: 'Montserrat Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Roboto Regular'), local('Roboto-Regular'), local('Roboto');
+  ascent-override: 85.7923%;
+  descent-override: 22.2457%;
+  line-gap-override: 0%;
+  size-adjust: 112.8307%;
+}
+@font-face {
+  font-family: 'Kaushan Script Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Roboto Regular'), local('Roboto-Regular'), local('Roboto');
+  ascent-override: 120.5107%;
+  descent-override: 40.8002%;
+  line-gap-override: 0%;
+  size-adjust: 89.9505%;
+}
+
+/* ---------- Gerätevarianten ----------
+   touch: Handy & Tablet (hoch/quer) = schmaler als 1024 px ODER ohne Maus-Hover
+   desk:  exaktes Gegenstück – mindestens 1024 px UND Maus-Hover */
+@custom-variant touch {
+  @media (width < 64rem), (hover: none) {
+    @slot;
+  }
+}
+@custom-variant desk {
+  @media (width >= 64rem) and (hover: hover) {
+    @slot;
+  }
+}
+
+/* ---------- Design-Tokens (aus referenz/LAYOUT.md) ---------- */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 30rem; /* 480 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 90rem; /* 1440 */
+
+  --color-accent: #fac014; /* Markenfarbe (theme-color Bestand) */
+  --color-accent-deep: #e0a800;
+  --color-accent-ink: #a87800; /* Akzent auf hellen Flächen: 3,67:1 auf paper (große Schrift) */
+  --color-ink: #141414;
+  --color-night: #0b0b0b;
+  --color-paper: #f7f7f9;
+  --color-text-dark: #111111;
+  --color-muted-dark: #4a4a4a;
+  --color-muted: #a3a3a3;
+  --color-line: #e6e6ea;
+
+  /* Erster Aufbau mit Ersatzschriften; Webfonts per html.fonts-ready (siehe BaseLayout) */
+  --font-script: 'Kaushan Script Fallback', cursive;
+  --font-sans: 'Montserrat Fallback', ui-sans-serif, system-ui, sans-serif;
+
+  --text-script-xl: clamp(3.25rem, 1.6rem + 7vw, 8.5rem);
+  --text-script-lg: clamp(2.75rem, 1.6rem + 5vw, 6rem);
+  --text-script-sm: clamp(2rem, 1.3rem + 3vw, 4.25rem);
+  --text-headline: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem);
+
+  --container-page: 73rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Seitenübergänge ----------
+   Native Cross-Document View Transitions (ohne JavaScript, Chrome/Edge/Safari 18+) */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* ---------- Basis ---------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 4.5rem;
+  }
+  body {
+    background-color: var(--color-night);
+    color: var(--color-text-light, #fff);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-light :focus-visible {
+    outline-color: var(--color-text-dark);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------- Komponenten ---------- */
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: var(--container-page);
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (width >= 48rem) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Script-Headline: kleine Zeile + große Akzentzeile (dekorativ, aria-hidden) */
+  .script-sm {
+    display: block;
+    font-family: var(--font-script);
+    font-size: var(--text-script-sm);
+    line-height: 1;
+  }
+  .script-lg {
+    display: block;
+    font-family: var(--font-script);
+    font-size: var(--text-script-lg);
+    line-height: 0.95;
+    color: var(--color-accent);
+  }
+  .script-xl {
+    display: block;
+    font-family: var(--font-script);
+    font-size: var(--text-script-xl);
+    line-height: 0.9;
+    color: var(--color-accent);
+  }
+
+  .headline {
+    font-weight: 800;
+    font-size: var(--text-headline);
+    line-height: 1.12;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Buttons: Rechteck, Radius 2px, gelb, Icon links */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: 2px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s var(--ease-out-soft);
+  }
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-text-dark);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-deep);
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-ghost {
+    border: 1px solid rgb(255 255 255 / 0.35);
+    color: #fff;
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* Textlink (Vorlage: „EXPLORE SITE MAP“) – auf Hell dunkel mit gelber Unterstreichung für AA-Kontrast */
+  .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+    transition: color 0.2s ease;
+  }
+  .text-link:hover {
+    color: var(--color-accent-deep);
+  }
+  .on-dark .text-link {
+    color: var(--color-accent);
+  }
+  .on-dark .text-link:hover {
+    color: #fff;
+  }
+
+  /* Karte im Stil der Feature-Box der Vorlage */
+  .card-light {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.35);
+  }
+  .card-dark {
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: 4px;
+  }
+
+  /* „Teller“: Bild mit weißem Ring und weichem Schatten */
+  .plate {
+    border: 6px solid #fff;
+    box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.75);
+    overflow: hidden;
+    background: #222;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    background: var(--color-accent);
+    color: var(--color-text-dark);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text-dark);
+  }
+
+  /* Formularfelder */
+  .field-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .field {
+    width: 100%;
+    min-height: 2.875rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #cfcfd6;
+    border-radius: 2px;
+    background: #fff;
+    color: var(--color-text-dark);
+    font: inherit;
+    transition: border-color 0.2s ease;
+  }
+  .field:focus {
+    border-color: var(--color-text-dark);
+  }
+  .field::placeholder {
+    color: #6b6b73;
+  }
+
+  /* Karussell-Spur: mobil & desktop per CSS scroll-snap */
+  .snap-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .snap-track::-webkit-scrollbar {
+    display: none;
+  }
+  .snap-track > * {
+    scroll-snap-align: center;
+    flex: none;
+  }
+}
+
+/* ---------- Webfonts aktiv (zweistufiges Laden) ---------- */
+html.fonts-ready {
+  --font-script: 'Kaushan Script', 'Kaushan Script Fallback', cursive;
+  --font-sans: 'Montserrat', 'Montserrat Fallback', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---------- Seitenhintergrund mit Parallax ----------
+   Fest hinter der ganzen Seite. Das Bild (nahtlos senkrecht wiederholbare Kachel) wird in voller
+   Breite gezeigt und läuft beim Scrollen mit 25 % der Geschwindigkeit mit. --pbg-travel setzt
+   PageBackground.astro (25 % der Scrollstrecke). CSS-Scroll-Animation, nur transform. */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-ink);
+}
+.page-bg-media {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(100lvh + var(--pbg-travel, 0px));
+  background-color: var(--color-ink);
+  background-position: top center;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.page-bg-media.is-loaded {
+  opacity: 1;
+}
+/* Querformat (Desktop/Tablet): etwas kleiner, seitlich weich ins Dunkle auslaufend
+   (keine Wiederholung zur Seite → keine Spiegel-Naht im Rosmarin) */
+@media (orientation: landscape) {
+  .page-bg-media {
+    background-size: 88% auto;
+    -webkit-mask-image: linear-gradient(90deg, transparent 6%, #000 15%, #000 85%, transparent 94%);
+    mask-image: linear-gradient(90deg, transparent 6%, #000 15%, #000 85%, transparent 94%);
+  }
+}
+.page-bg-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgb(10 10 10 / 0.62), rgb(10 10 10 / 0.42));
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .page-bg-media {
+      animation: page-bg-parallax linear both;
+    }
+    /* eigene Regel: sonst fasst der Minifier beides zu einer ungültigen Kurzschreibweise zusammen */
+    .page-bg > .page-bg-media {
+      animation-timeline: scroll(root);
+    }
+  }
+}
+/* Ende: Unterkante des Bildes an der Unterkante des Viewports (Weg = --pbg-travel) */
+@keyframes page-bg-parallax {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(100lvh - 100%));
+  }
+}
+
+/* Weiche Übergänge dunkler Sektionen zur einfarbigen Papierkante bzw. zum Footer */
+.fade-top-ink,
+.fade-top-night,
+.fade-bottom-night {
+  position: absolute;
+  inset-inline: 0;
+  z-index: -1;
+  height: 12rem;
+  pointer-events: none;
+}
+.fade-top-ink {
+  top: 0;
+  background: linear-gradient(var(--color-ink) 1.5rem, transparent);
+}
+.fade-top-night {
+  top: 0;
+  background: linear-gradient(var(--color-night) 1.5rem, transparent);
+}
+.fade-bottom-night {
+  bottom: 0;
+  background: linear-gradient(transparent, var(--color-night) calc(100% - 1rem));
+}
+
+/* ---------- Rendering erst bei Bedarf ----------
+   Sektionen außerhalb des Viewports werden erst berechnet, wenn sie in die Nähe kommen
+   (spart Style/Layout beim Laden). Nur für Sektionen ohne über den Rand ragende Elemente. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ---------- Script-Akzente auf hellen Flächen ----------
+   Ohne @layer, damit die Regel auch Tailwind-Utilities wie text-accent überschreibt.
+   Dunkleres Gold (#a87800, 3,67:1) für WCAG-Kontrast bei großer Schrift. */
+.on-light .script-lg,
+.on-light .script-xl,
+.on-light .script-sm.text-accent {
+  color: var(--color-accent-ink);
+}
+
+/* ---------- Kreide-/Schiefertextur (Vorlage Menü-Sektion) ---------- */
+.texture-chalk {
+  background:
+    /* oben reines ink: gleiche Helligkeit wie die dunkle Papierkante darüber → keine Naht */
+    linear-gradient(var(--color-ink) 0, var(--color-ink) 2.5rem, transparent 14rem),
+    radial-gradient(ellipse 60% 45% at 18% 25%, rgb(255 255 255 / 0.06), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 82% 70%, rgb(255 255 255 / 0.05), transparent 70%),
+    radial-gradient(ellipse 35% 30% at 55% 45%, rgb(250 192 20 / 0.05), transparent 70%),
+    var(--color-ink);
+}
+:root {
+  --noise-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.texture-chalk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image: var(--noise-tile);
+}
+
+/* ---------- Scroll-Maus (Hero) ---------- */
+@keyframes mouse-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+.mouse-dot {
+  animation: mouse-dot 1.8s var(--ease-out-soft) infinite;
+}

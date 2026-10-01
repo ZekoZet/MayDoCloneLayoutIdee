@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import NewsGrid from '../components/NewsGrid.astro';
+import PressBox from '../components/PressBox.astro';
+import { newsIntro } from '../data/news';
+
+const title = 'Nachrichten & Neuigkeiten | Maydonoz Döner Deutschland';
+const description =
+  'Aktuelle Nachrichten, Aktionen, Auszeichnungen und Store-Eröffnungen von Maydonoz Döner Deutschland. Erfahren Sie alles über neue Geschmackskreationen und Expansionen.';
+---
+
+<BaseLayout title={title} description={description} path="/news/">
+  <PageHero small="Aktuelles" large="& Presse" title={newsIntro.heading} text={newsIntro.text} edge="text-ink" seed={17} />
+  <NewsGrid />
+  <PressBox />
+</BaseLayout>

@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../data/site';
+---
+
+<BaseLayout title={`404 | ${site.name}`} description={site.heroTitle} path="/404/">
+  <PageHero small="404" large={site.name} title={site.heroTitle} edge="text-ink" seed={29} />
+  <section class="bg-ink py-20 text-center">
+    <a href="/" class="btn btn-primary">{site.homeAria}</a>
+  </section>
+</BaseLayout>

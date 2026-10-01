@@ -1,0 +1,79 @@
+---
+import { getImage } from 'astro:assets';
+import poster from '../assets/brand/hero-poster.jpg';
+import posterPortrait from '../assets/brand/bg-mobile.jpg';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+import { site } from '../data/site';
+
+interface Props {
+  nextId: string;
+  nextLabel: string;
+}
+const { nextId, nextLabel } = Astro.props;
+
+// Slogan des Bestands als Script-Headline auf zwei Zeilen
+const [line1, line2] = ['Echter Genuss', 'beginnt mit Tradition'];
+
+// Scharfe Hintergründe ohne Vergrößerung: Querformat = Standbild aus dem 4K-Video,
+// Hochformat = Siegel auf Schiefer. <picture> sorgt dafür, dass nur das passende Bild lädt.
+const srcset = async (src: typeof poster, widths: number[], quality: number) =>
+  (await Promise.all(widths.map((width) => getImage({ src, width, quality, format: 'webp' }))))
+    .map((img) => `${img.src} ${img.options.width}w`)
+    .join(', ');
+const landscapeSet = await srcset(poster, [960, 1280, 1600, 1920, 2560], 72);
+const portraitSet = await srcset(posterPortrait, [414, 640, 828], 70);
+const fallback = await getImage({ src: poster, width: 1280, quality: 72, format: 'webp' });
+---
+
+<section id="start" class="on-dark relative isolate flex min-h-[88svh] items-center overflow-hidden bg-ink pt-16 lg:min-h-[100svh]">
+  <div class="absolute inset-0 -z-10">
+    <picture>
+      <source media="(orientation: portrait)" srcset={portraitSet} sizes="100vw" />
+      <img
+        src={fallback.src}
+        srcset={landscapeSet}
+        sizes="100vw"
+        alt=""
+        width="2560"
+        height="1440"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="size-full object-cover"
+      />
+    </picture>
+    <video
+      class="absolute inset-0 hidden size-full object-cover opacity-0 transition-opacity duration-700 data-[playing=true]:opacity-100 lg:landscape:block"
+      data-src="/videos/HomeHero.webm"
+      muted
+      loop
+      playsinline
+      preload="none"
+      aria-hidden="true"
+      tabindex="-1"></video>
+  </div>
+  <!-- leichte Abdunklung: Logo bleibt sichtbar, Text bekommt Schatten -->
+  <div class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(0_0_0/0.55)_0%,rgb(0_0_0/0.28)_35%,rgb(0_0_0/0.28)_65%,rgb(0_0_0/0.6)_100%)]"></div>
+
+  <div class="container-page py-24 text-center">
+    <ScriptHeading small={line1} large={line2} tone="light" class="[text-shadow:0_2px_6px_rgb(0_0_0/0.85),0_6px_28px_rgb(0_0_0/0.7)]">
+      <h1 class="mx-auto mt-6 max-w-2xl text-[0.8rem] font-bold tracking-[0.18em] text-white uppercase sm:text-sm [text-shadow:0_2px_8px_rgb(0_0_0/0.9)]" data-reveal>
+        {site.heroTitle}
+      </h1>
+    </ScriptHeading>
+  </div>
+
+  <!-- Scroll-Maus (Vorlage) -->
+  <a
+    href={`#${nextId}`}
+    aria-label={nextLabel}
+    class="absolute bottom-[clamp(2.5rem,6vw,5rem)] left-1/2 z-[3] grid min-h-11 min-w-11 -translate-x-1/2 place-items-center text-white/85 hover:text-accent"
+  >
+    <span class="flex h-9 w-[22px] justify-center rounded-full border-2 border-current pt-1.5" aria-hidden="true">
+      <span class="mouse-dot block h-2 w-[3px] rounded-full bg-current"></span>
+    </span>
+  </a>
+
+  <TornEdge color="text-paper" seed={3} />
+</section>

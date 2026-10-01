@@ -1,0 +1,39 @@
+---
+// Zweizeilige Script-Headline der Vorlage (kleine Zeile + große Akzentzeile).
+// Rein dekorativ → aria-hidden; die echte Überschrift kommt über den Slot.
+interface Props {
+  small?: string;
+  large: string;
+  /** Farbe der kleinen Zeile */
+  tone?: 'light' | 'dark' | 'accent';
+  size?: 'lg' | 'xl';
+  align?: 'center' | 'left';
+  /** kleine Zeile unter der großen, eingerückt (Vorlage „Start with“) */
+  smallAfter?: boolean;
+  class?: string;
+}
+
+const { small, large, tone = 'light', size = 'lg', align = 'center', smallAfter = false, class: className } = Astro.props;
+const smallColor = tone === 'light' ? 'text-white' : tone === 'dark' ? 'text-text-dark' : 'text-accent';
+---
+
+<div class:list={[align === 'center' ? 'text-center' : 'text-left', className]}>
+  <p class="select-none" aria-hidden="true">
+    {
+      small && !smallAfter && (
+        <span class:list={['script-sm', smallColor]} data-reveal-line>
+          {small}
+        </span>
+      )
+    }
+    <span class:list={[size === 'xl' ? 'script-xl' : 'script-lg', '-rotate-2 origin-left']} data-reveal-line>{large}</span>
+    {
+      small && smallAfter && (
+        <span class:list={['script-sm -mt-2 pl-[38%] !text-[clamp(1.5rem,1.1rem+1.2vw,2rem)]', smallColor]} data-reveal-line>
+          {small}
+        </span>
+      )
+    }
+  </p>
+  <slot />
+</div>

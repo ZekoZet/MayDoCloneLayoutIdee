@@ -1,0 +1,20 @@
+---
+import Icon from './Icon.astro';
+import RoundButton from './RoundButton.astro';
+---
+
+<section id="feedback-teaser" class="on-dark relative isolate z-[1] overflow-x-clip py-24 text-center text-white lg:py-28">
+  <div class="fade-top-ink" aria-hidden="true"></div>
+  <div class="fade-bottom-night" aria-hidden="true"></div>
+  <div class="container-page" data-reveal>
+    <Icon name="star" size={36} class="mx-auto text-accent" />
+    <p class="eyebrow mt-4 text-accent">GÄSTE-FEEDBACK BOGEN</p>
+    <h2 class="headline mx-auto mt-3 max-w-2xl text-white">Möchten Sie Ihren letzten Restaurantbesuch bewerten?</h2>
+    <p class="mx-auto mt-4 max-w-xl text-white/75">Nutzen Sie unser detailliertes Zufriedenheitsformular für Geschmack, Schnelligkeit und Service.</p>
+    <a href="/feedback/" class="btn btn-primary mt-8">
+      <Icon name="chevron-right" size={16} class="stroke-[2.5]" />
+      Zum Feedback-Formular
+    </a>
+  </div>
+  <RoundButton href="#start" label="KONTAKTFORMULAR" direction="up" />
+</section>

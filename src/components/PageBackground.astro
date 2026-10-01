@@ -1,0 +1,94 @@
+---
+// Fester Seitenhintergrund (Schiefer mit Rosmarin) mit Parallax-Effekt.
+// Sichtbar in allen dunklen Bereichen; helle Sektionen und Foto-Heros liegen darüber.
+// - Kacheln aus scripts/make-page-bg.mjs: 2× hochgerechnet + nahtlos senkrecht wiederholbar
+//   (Querformat: Rosmarin links + rechts, Hochformat: einseitiger Ausschnitt)
+// - Darstellung in voller Breite (natürliche Proportionen, kein „cover“-Zoom)
+// - Parallax: Hintergrund läuft mit 25 % der Scrollgeschwindigkeit mit
+// - wird erst nach dem Hero-Bild (LCP) geladen, damit PageSpeed nicht leidet
+import { getImage } from 'astro:assets';
+import tileLandscape from '../assets/brand/page-bg-landscape-tile.jpg';
+import tilePortrait from '../assets/brand/page-bg-portrait-tile.jpg';
+
+const variant = (src: typeof tileLandscape, width: number, quality: number) =>
+  getImage({ src, width, quality, format: 'webp' }).then((img) => img.src);
+
+const sources = {
+  landscape1x: await variant(tileLandscape, 1600, 72),
+  landscape2x: await variant(tileLandscape, 3092, 62),
+  portrait1x: await variant(tilePortrait, 600, 75),
+  portrait2x: await variant(tilePortrait, 1176, 70),
+};
+---
+
+<div class="page-bg" aria-hidden="true" data-page-bg={JSON.stringify(sources)}>
+  <div class="page-bg-media"></div>
+  <div class="page-bg-shade"></div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-page-bg]');
+  const media = root?.querySelector<HTMLElement>('.page-bg-media');
+  const SPEED = 0.25; // Anteil der Scrollgeschwindigkeit
+
+  if (root && media) {
+    const src = JSON.parse(root.dataset.pageBg ?? '{}') as Record<string, string>;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const portrait = window.matchMedia('(orientation: portrait)');
+    const cssParallax = CSS.supports('animation-timeline: scroll()');
+
+    // passendes Bild für Ausrichtung + Pixeldichte, vorladen, dann einblenden
+    const pick = () => {
+      const hiDpi = window.devicePixelRatio > 1.25;
+      if (portrait.matches) return hiDpi ? src.portrait2x : src.portrait1x;
+      return hiDpi ? src.landscape2x : src.landscape1x;
+    };
+    const apply = () => {
+      const url = pick();
+      if (!url) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        media.style.backgroundImage = `url("${url}")`;
+        media.classList.add('is-loaded');
+      };
+      img.src = url;
+    };
+
+    // Parallax-Weg: Hintergrund ist um 25 % der maximalen Scrollstrecke höher als der Viewport
+    const updateTravel = () => {
+      const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const travel = reduced.matches ? 0 : Math.round(max * SPEED);
+      root.style.setProperty('--pbg-travel', `${travel}px`);
+    };
+
+    // Fallback ohne CSS-Scroll-Animation (z. B. Firefox): transform per requestAnimationFrame
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        media.style.transform = reduced.matches ? '' : `translate3d(0, ${-window.scrollY * SPEED}px, 0)`;
+      });
+    };
+
+    const start = () => {
+      apply();
+      updateTravel();
+      new ResizeObserver(updateTravel).observe(document.body);
+      window.addEventListener('resize', updateTravel, { passive: true });
+      portrait.addEventListener('change', apply);
+      reduced.addEventListener('change', updateTravel);
+      if (!cssParallax) {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+    };
+
+    // nach load + Leerlauf (Hero-Bild/LCP zuerst)
+    const idle = () => setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : start()), 600);
+    if (document.readyState === 'complete') idle();
+    else addEventListener('load', idle, { once: true });
+  }
+</script>

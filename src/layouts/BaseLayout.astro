@@ -1,0 +1,126 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import FloatingMenu from '../components/FloatingMenu.astro';
+import PageBackground from '../components/PageBackground.astro';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Pfad der Seite, z. B. "/ueber-uns/" – canonical wie im Bestand */
+  path: string;
+  jsonLd?: Record<string, unknown>;
+}
+
+const { title, description, path, jsonLd } = Astro.props;
+const canonical = new URL(path, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Social Sharing (1:1 Bestand) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={site.ogImage} />
+    <meta property="og:locale" content="de_DE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={site.ogImage} />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Maydonoz" />
+    <meta name="application-name" content="Maydonoz Döner" />
+    <meta name="theme-color" content="#FAC014" />
+
+    <!-- Zweistufiges Font-Laden: erster Aufbau mit maßgleichen Ersatzschriften, Webfonts nach dem
+         load-Event im Leerlauf (Hero-Bild/LCP bekommt die Bandbreite zuerst). Ab der zweiten Seite
+         derselben Sitzung sofort aus dem Cache. -->
+    <script is:inline>
+      (() => {
+        const html = document.documentElement;
+        const KEY = 'fonts-ready';
+        const ready = () => html.classList.add(KEY);
+        const cached = () => {
+          try {
+            return sessionStorage.getItem(KEY) === '1';
+          } catch {
+            return false;
+          }
+        };
+        if (cached()) ready();
+        if (html.classList.contains(KEY)) return;
+        const load = () =>
+          Promise.all([
+            document.fonts.load('400 1em Montserrat'),
+            document.fonts.load('700 1em Montserrat'),
+            document.fonts.load('1em "Kaushan Script"'),
+          ])
+            .then(() => {
+              ready();
+              try {
+                sessionStorage.setItem(KEY, '1');
+              } catch {}
+            })
+            .catch(() => {});
+        // erst wenn das größte Element (LCP) gerendert ist und die Seite geladen hat, plus kurzer Puffer im Leerlauf
+        const idle = () =>
+          setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 2000 }) : load()), 800);
+        const afterLoad = () => (document.readyState === 'complete' ? idle() : addEventListener('load', idle, { once: true }));
+        try {
+          const po = new PerformanceObserver(() => {
+            po.disconnect();
+            afterLoad();
+          });
+          po.observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch {
+          afterLoad();
+        }
+      })();
+    </script>
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+  </head>
+  <body class="min-h-dvh">
+    <PageBackground />
+    <a
+      href="#main-content"
+      class="fixed left-4 top-4 z-[60] -translate-y-24 bg-accent px-4 py-3 text-sm font-bold text-text-dark transition-transform focus:translate-y-0"
+    >
+      {site.skipLink}
+    </a>
+    <Header />
+    <main id="main-content" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
+    <Footer />
+    <FloatingMenu />
+
+    <script>
+      import { initMotion } from '../scripts/motion';
+      import { initVideos } from '../scripts/video';
+
+      initVideos();
+      void initMotion();
+    </script>
+  </body>
+</html>

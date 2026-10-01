@@ -1,0 +1,35 @@
+---
+// Kopfbereich der Unterseiten – verkleinerte Variante des Vorlagen-Heros
+import { Image } from 'astro:assets';
+import poster from '../assets/brand/hero-poster.jpg';
+import ScriptHeading from './ScriptHeading.astro';
+import TornEdge from './TornEdge.astro';
+
+interface Props {
+  small: string;
+  large: string;
+  title: string;
+  text?: string;
+  /** Farbe der Folgesektion für die Riss-Kante */
+  edge: 'text-paper' | 'text-ink';
+  seed?: number;
+}
+
+const { small, large, title, text, edge, seed = 5 } = Astro.props;
+---
+
+<section id="start" class="on-dark relative isolate flex min-h-[58svh] items-end overflow-hidden bg-ink pt-16 lg:min-h-[64svh]">
+  <div class="absolute inset-x-0 -top-[10%] -z-10 h-[120%]" data-parallax>
+    <Image src={poster} alt="" widths={[640, 768, 1024, 1440, 1920]} sizes="100vw" loading="eager" fetchpriority="high" quality={60} class="size-full object-cover" />
+  </div>
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_60%_at_50%_55%,rgb(0_0_0/0.8)_0%,rgb(0_0_0/0.62)_60%,rgb(0_0_0/0.8)_100%)]"></div>
+
+  <div class="container-page pt-16 pb-[clamp(4.5rem,9vw,7.5rem)] text-center">
+    <ScriptHeading small={small} large={large} tone="light" class="[text-shadow:0_4px_24px_rgb(0_0_0/0.6)]">
+      <h1 class="headline mx-auto mt-6 max-w-3xl text-white" data-reveal>{title}</h1>
+      {text && <p class="mx-auto mt-4 max-w-2xl text-[0.95rem] text-white/80" data-reveal>{text}</p>}
+    </ScriptHeading>
+  </div>
+
+  <TornEdge color={edge} seed={seed} />
+</section>
