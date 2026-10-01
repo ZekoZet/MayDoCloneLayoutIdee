@@ -1,0 +1,6 @@
+# robots.txt für https://maydonozdoner.de
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://maydonozdoner.de/sitemap-index.xml
